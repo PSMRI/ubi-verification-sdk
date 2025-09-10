@@ -9,6 +9,15 @@ A lightweight, extensible Node.js library for credential verification, designed 
 - Built with Fastify for high performance and scalability
 - Easily configurable for various use cases
 
+## Documentation
+
+Visit the following links hosted with Gitbook for detailed documentation on the UBI Verification SDK:
+
+- [Verification SDK Overview](https://piramal-swasthya.gitbook.io/uba/toasters/verification-sdk)
+- [Prerequisites](https://piramal-swasthya.gitbook.io/uba/toasters/verification-sdk/prerequisites)
+- [Environment Variables](https://piramal-swasthya.gitbook.io/uba/toasters/verification-sdk/environment-variables)
+- [Build and Run Guide](https://piramal-swasthya.gitbook.io/uba/toasters/verification-sdk/build-and-run-guide)
+
 ## Running the Server
 
 To start the server, run:

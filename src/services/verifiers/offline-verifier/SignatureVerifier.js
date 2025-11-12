@@ -1,5 +1,5 @@
-const VerifierInterface = require('../VerifierInterface');
-
+const VerifierInterface = require("../VerifierInterface");
+// private
 class SignatureVerifier extends VerifierInterface {
   async verify(credential) {
     // Stubbed logic, replace with real signature verification logic
@@ -8,12 +8,12 @@ class SignatureVerifier extends VerifierInterface {
     if (isValid) {
       return {
         success: true,
-        message: 'Credential verified using signature.'
+        message: "Credential verified using signature.",
       };
     } else {
       return {
         success: false,
-        message: 'Credential verification using signature failed.'
+        message: "Credential verification using signature failed.",
       };
     }
   }

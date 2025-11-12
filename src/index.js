@@ -213,7 +213,6 @@ fastify.post('/verification', {
 }, async (request, reply) => {
   try {
     const payload = request.body;
-console.log("-------------------------------- PAYLOAD -------------------------------- ",payload);
     if (!payload.credential || typeof payload.credential !== 'object' || Object.keys(payload.credential).length === 0) {
       reply.code(400).send({ error: 'Missing or empty required parameter: credential' });
       return;

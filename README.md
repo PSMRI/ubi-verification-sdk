@@ -50,6 +50,69 @@ Response:
 }
 ```
 
+## Get Available Issuers
+
+You can fetch the list of all supported issuers by accessing the `/issuers` endpoint. The SDK **automatically discovers** all available verifiers by reading the verifier files from the `online-verifiers` and `offline-verifier` directories.
+
+```bash
+curl http://localhost:{{PORT}}/issuers
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "count": 3,
+  "data": [
+    {
+      "id": "dhiway",
+      "name": "Dhiway",
+      "type": "online",
+      "description": "Dhiway credential verification"
+    },
+    {
+      "id": "jharseva",
+      "name": "JharSeva",
+      "type": "online",
+      "description": "JharSeva credential verification"
+    },
+    {
+      "id": "signature",
+      "name": "Signature",
+      "type": "offline",
+      "description": "Signature credential verification"
+    }
+  ]
+}
+```
+
+### Filter by Type
+
+You can filter issuers by type (online or offline):
+
+```bash
+# Get only online verifiers
+curl http://localhost:{{PORT}}/issuers?type=online
+
+# Get only offline verifiers
+curl http://localhost:{{PORT}}/issuers?type=offline
+```
+
+### How Issuers are Discovered
+
+The `/issuers` endpoint dynamically scans the following directories:
+
+- `src/services/verifiers/online-verifiers/` - for online verifiers
+- `src/services/verifiers/offline-verifier/` - for offline verifiers
+
+Any file ending with `Verifier.js` is automatically detected and added to the issuers list:
+
+- **File name**: `DhiwayVerifier.js` → **Issuer ID**: `dhiway`, **Display Name**: `Dhiway`
+- **File name**: `JharSevaVerifier.js` → **Issuer ID**: `jharseva`, **Display Name**: `JharSeva`
+
+This means when you add a new verifier file, it will automatically appear in the issuers list without any additional configuration!
+
 ## API Reference
 
 ### `/verification` Endpoint
@@ -66,9 +129,9 @@ To add new verifiers, implement a new class and integrate it with the verificati
   The credential JSON to be verified.
 
 - **`config`** (`object`, required):  
-  Configuration object for verification.  
+  Configuration object for verification.
   - **`method`** (`string`, required):  
-    The verification method to use.  
+    The verification method to use.
     - `"online"`: Verifies using a named online verifier (requires `issuerName`).
     - `"offline"`: (To be implemented by adding an offline verifier class)
   - **`issuerName`** (`string`, required if `method` is `"online"`):  
@@ -131,9 +194,9 @@ To add new verifiers, implement a new class and integrate it with the verificati
 ### Example
 
 ```javascript
-const axios = require('axios');
+const axios = require("axios");
 
-const VERIFY_ENDPOINT = 'http://localhost:{{PORT}}/verification'; // Replace {{PORT}} with your server port
+const VERIFY_ENDPOINT = "http://localhost:{{PORT}}/verification"; // Replace {{PORT}} with your server port
 
 const credential = {
   // Your credential JSON here
@@ -141,8 +204,8 @@ const credential = {
 
 const config = {
   // For method: 'online', you must also provide issuerName, e.g.:
-  method: 'online',
-  issuerName: 'dhiway'
+  method: "online",
+  issuerName: "dhiway",
 };
 
 async function verifyCredential() {
@@ -151,9 +214,12 @@ async function verifyCredential() {
       credential,
       config,
     });
-    console.log('✅ Verification Result:', response.data);
+    console.log("✅ Verification Result:", response.data);
   } catch (error) {
-    console.error('❌ Verification Failed:', error.response?.data || error.message);
+    console.error(
+      "❌ Verification Failed:",
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -186,26 +252,35 @@ The SDK uses a modular, extensible architecture for credential verification, cen
 ### How to Add a New Verifier
 
 1. **Create a New Verifier Class:**
+
    - Extend [`VerifierInterface`](src/services/verifiers/VerifierInterface.js).
    - Implement the `verify(credential)` method with your logic.
    - Place your file in the appropriate folder (`online-verifiers` or `offline-verifier`).
 
 2. **Naming Convention:**
+
    - Name your class as `<ProviderName>Verifier` (e.g., `AcmeVerifier`).
    - The filename should match the class name (e.g., `AcmeVerifier.js`).
+   - **Important**: The file MUST end with `Verifier.js` to be automatically discovered.
 
-3. **Update Configuration:**
+3. **That's It! No Configuration Needed:**
+
+   - Your new verifier will **automatically appear** in the `/issuers` endpoint.
+   - The issuer ID is derived from the filename (e.g., `AcmeVerifier.js` → issuer ID: `acme`).
    - To use your verifier, set `method` and `issuerName` in the request config:
      ```json
      {
-       "credential": { /* ... */ },
+       "credential": {
+         /* ... */
+       },
        "config": {
          "method": "online",
          "issuerName": "acme"
        }
      }
      ```
-   - The factory will automatically load your verifier if the naming matches.
+   - **Note**: The `issuerName` is case-insensitive. You can use `"acme"`, `"Acme"`, or `"ACME"` - they all work!
+   - The factory will automatically load your verifier based on the naming convention.
 
 4. **(Optional) Add Error Translation:**
    - For online verifiers, you can add custom error translation logic as shown in [`DhiwayVerifier.js`](src/services/verifiers/online-verifiers/DhiwayVerifier.js).
@@ -213,26 +288,38 @@ The SDK uses a modular, extensible architecture for credential verification, cen
 ### Example: Adding a New Online Verifier
 
 1. Create `src/services/verifiers/online-verifiers/AcmeVerifier.js`:
+
    ```js
-   const VerifierInterface = require('../VerifierInterface');
+   const VerifierInterface = require("../VerifierInterface");
    class AcmeVerifier extends VerifierInterface {
      async verify(credential) {
        // Your verification logic here
-       return { success: true, message: 'Verified by Acme.' };
+       return { success: true, message: "Verified by Acme." };
      }
    }
    module.exports = AcmeVerifier;
    ```
 
 2. Use it in your API request:
+
    ```json
    {
-     "credential": { /* ... */ },
+     "credential": {
+       /* ... */
+     },
      "config": {
        "method": "online",
        "issuerName": "acme"
      }
    }
+   ```
+
+   **Case-Insensitive**: All of these will work:
+
+   ```json
+   "issuerName": "acme"   // lowercase
+   "issuerName": "Acme"   // capitalized
+   "issuerName": "ACME"   // uppercase
    ```
 
 ---

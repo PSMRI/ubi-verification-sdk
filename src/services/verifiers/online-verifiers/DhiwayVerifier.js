@@ -1,16 +1,28 @@
 const axios = require("axios");
 const VerifierInterface = require("../VerifierInterface");
+
+// Private title - if not set, will use filename
+const _title = "dhiway"; // Set to custom title if needed, e.g., "Dhiway Verification Service"
+
 class DhiwayVerifier extends VerifierInterface {
-  constructor() {
-    super();
+  constructor(config = {}) {
+    super(config, __filename);
+    // Set title if _title is defined
+    if (_title) {
+      this.setTitle(_title);
+    }
     this.apiEndpoint = process.env.DHIWAY_VERIFIER_VERIFICATION_API;
     this.apiToken = process.env.DHIWAY_VERIFIER_VERIFICATION_API_TOKEN;
     this.expiryField = process.env.DHIWAY_VERIFIER_EXPIRY_FIELD || "validUntil";
     if (!this.apiEndpoint) {
-      throw new Error("DHIWAY_VERIFIER_VERIFICATION_API environment variable is not set.");
+      throw new Error(
+        "DHIWAY_VERIFIER_VERIFICATION_API environment variable is not set."
+      );
     }
     if (!this.apiToken) {
-      throw new Error("DHIWAY_VERIFIER_VERIFICATION_API_TOKEN environment variable is not set.");
+      throw new Error(
+        "DHIWAY_VERIFIER_VERIFICATION_API_TOKEN environment variable is not set."
+      );
     }
   }
 
@@ -29,7 +41,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (!credential) {
         return {
           isValid: false,
-          error: "Invalid credential structure: missing credentialSubject"
+          error: "Invalid credential structure: missing credentialSubject",
         };
       }
 
@@ -38,7 +50,7 @@ class DhiwayVerifier extends VerifierInterface {
       // If expiry field is not present, skip expiry check and proceed with verification
       if (!validUpto) {
         return {
-          isValid: true
+          isValid: true,
         };
       }
 
@@ -49,7 +61,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (isNaN(expiryDate.getTime())) {
         return {
           isValid: false,
-          error: "Invalid validupto date format"
+          error: "Invalid validupto date format",
         };
       }
 
@@ -59,17 +71,17 @@ class DhiwayVerifier extends VerifierInterface {
       if (currentDate > expiryDate) {
         return {
           isValid: false,
-          error: "The credential has expired and is no longer valid."
+          error: "The credential has expired and is no longer valid.",
         };
       }
 
       return {
-        isValid: true
+        isValid: true,
       };
     } catch (error) {
       return {
         isValid: false,
-        error: "Error checking credential expiry: " + error.message
+        error: "Error checking credential expiry: " + error.message,
       };
     }
   }
@@ -117,22 +129,18 @@ class DhiwayVerifier extends VerifierInterface {
           errors: [
             {
               error: expiryCheck.error,
-              raw: "VC expiration check failed"
-            }
-          ]
+              raw: "VC expiration check failed",
+            },
+          ],
         };
       }
 
-      const response = await axios.post(
-        this.apiEndpoint,
-        credential,
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(this.apiEndpoint, credential, {
+        headers: {
+          Authorization: `Bearer ${this.apiToken}`,
+          "Content-Type": "application/json",
+        },
+      });
       return this.translateResponse(response);
     } catch (error) {
       return {

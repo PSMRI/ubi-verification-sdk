@@ -22,6 +22,102 @@ paths:
                   status:
                     type: string
                     example: ok
+  /issuers:
+    get:
+      summary: Get list of available issuers
+      tags:
+        - Issuers
+      description: Returns a dynamically discovered list of all credential issuers supported by the verification SDK. Issuers are automatically discovered by scanning the verifier directories.
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum:
+              - online
+              - offline
+          required: false
+          description: Filter issuers by type (online or offline)
+      responses:
+        '200':
+          description: List of issuers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 3
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: aadhaar
+                        name:
+                          type: string
+                          example: Aadhaar
+                        type:
+                          type: string
+                          enum:
+                            - online
+                            - offline
+                          example: online
+                        description:
+                          type: string
+                          example: Aadhaar credential verification
+              examples:
+                AllIssuers:
+                  summary: All issuers
+                  value:
+                    success: true
+                    count: 3
+                    data:
+                      - id: dhiway
+                        name: Dhiway
+                        type: online
+                        description: Dhiway credential verification
+                      - id: jharseva
+                        name: JharSeva
+                        type: online
+                        description: JharSeva credential verification
+                      - id: signature
+                        name: Signature
+                        type: offline
+                        description: Signature credential verification
+                OnlineIssuers:
+                  summary: Online issuers only
+                  value:
+                    success: true
+                    count: 2
+                    data:
+                      - id: dhiway
+                        name: Dhiway
+                        type: online
+                        description: Dhiway credential verification
+                      - id: jharseva
+                        name: JharSeva
+                        type: online
+                        description: JharSeva credential verification
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Internal server error
   /verification:
     post:
       summary: Verify beneficiary credentials

@@ -1,5 +1,9 @@
 const axios = require("axios");
 const VerifierInterface = require("../VerifierInterface");
+
+// Private title - if not set, will use filename
+const _title = "jharseva"; // Set to custom title if needed, e.g., "JharSeva Verification Service"
+
 //TODO: Implement the JharSeva verifier
 /**
  * JharSevaVerifier - Online verifier for JharSeva credentials
@@ -18,8 +22,12 @@ const VerifierInterface = require("../VerifierInterface");
  * @extends VerifierInterface
  */
 class JharSevaVerifier extends VerifierInterface {
-  constructor() {
-    super();
+  constructor(config = {}) {
+    super(config, __filename);
+    // Set title if _title is defined
+    if (_title) {
+      this.setTitle(_title);
+    }
     // Load configuration from environment variables
     this.apiEndpoint = process.env.JHARSEVA_VERIFICATION_API;
     this.apiToken = process.env.JHARSEVA_VERIFICATION_API_TOKEN;

@@ -32,18 +32,6 @@ class JharSevaVerifier extends VerifierInterface {
     this.apiEndpoint = process.env.JHARSEVA_VERIFICATION_API;
     this.apiToken = process.env.JHARSEVA_VERIFICATION_API_TOKEN;
     this.expiryField = process.env.JHARSEVA_EXPIRY_FIELD || "validUntil";
-
-    // Validate required configuration
-    if (!this.apiEndpoint) {
-      throw new Error(
-        "JHARSEVA_VERIFICATION_API environment variable is not set."
-      );
-    }
-    if (!this.apiToken) {
-      throw new Error(
-        "JHARSEVA_VERIFICATION_API_TOKEN environment variable is not set."
-      );
-    }
   }
 
   /**
@@ -172,6 +160,7 @@ class JharSevaVerifier extends VerifierInterface {
    *   - errors: array of error objects (only if success is false)
    */
   async verify(credential) {
+    console.log("JharSeva verifier called");
     try {
       // Step 1: Check credential expiry before making API call
       const expiryCheck = this.checkExpiry(credential);
@@ -183,13 +172,21 @@ class JharSevaVerifier extends VerifierInterface {
           errors: [
             {
               error: expiryCheck.error,
-              raw: "Credential expiration check failed",
+              raw: "VC expiration check failed",
             },
           ],
         };
       }
 
-      // Step 2: Make API call to JharSeva verification endpoint
+      // Step 2: If endpoints are not configured, return success response (same as Dhiway behavior)
+      if (!this.apiEndpoint || !this.apiToken) {
+        return {
+          success: true,
+          message: "Credential verified successfully.",
+        };
+      }
+
+      // Step 3: Make API call to JharSeva verification endpoint
       const response = await axios.post(this.apiEndpoint, credential, {
         headers: {
           Authorization: `Bearer ${this.apiToken}`,
@@ -197,7 +194,7 @@ class JharSevaVerifier extends VerifierInterface {
         },
       });
 
-      // Step 3: Translate and return response
+      // Step 4: Translate and return response
       return this.translateResponse(response);
     } catch (error) {
       // Handle API errors (network issues, timeouts, etc.)

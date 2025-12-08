@@ -1,0 +1,35 @@
+{
+    "errors": {
+        "missingCredential": "अनिवार्य पैरामीटर गायब या खाली: credential",
+        "missingConfig": "अनिवार्य पैरामीटर गायब: config",
+        "verificationFailed": "सत्यापन विफल",
+        "validationError": "सत्यापन त्रुटि: {{details}}",
+        "invalidResultNotObject": "अमान्य सत्यापन परिणाम: वस्तु नहीं है",
+        "invalidResultMissingSuccess": "अमान्य सत्यापन परिणाम: \"success\" बूलियन गायब है",
+        "invalidResultMissingMessage": "अमान्य सत्यापन परिणाम: \"message\" गायब है",
+        "invalidResultMissingErrors": "अमान्य सत्यापन परिणाम: विफल परिणाम में \"errors\" सरणी शामिल होनी चाहिए",
+        "genericError": "एक त्रुटि हुई: {{message}}"
+    },
+    "verification": {
+        "success": "क्रेडेंशियल सफलतापूर्वक सत्यापित किया गया।",
+        "failed": "क्रेडेंशियल सत्यापन विफल।",
+        "signatureSuccess": "हस्ताक्षर का उपयोग करके क्रेडेंशियल सत्यापित किया गया।",
+        "signatureFailed": "हस्ताक्षर का उपयोग करके क्रेडेंशियल सत्यापन विफल।",
+        "apiError": "सत्यापन API त्रुटि"
+    },
+    "credential": {
+        "invalidStructure": "अमान्य क्रेडेंशियल संरचना: credentialSubject गायब है",
+        "invalidExpiryFormat": "अमान्य validupto दिनांक प्रारूप",
+        "expired": "क्रेडेंशियल समाप्त हो गया है और अब मान्य नहीं है।",
+        "expiryCheckError": "क्रेडेंशियल समाप्ति जांच करने में त्रुटि: {{error}}"
+    },
+    "dhiway": {
+        "errors": {
+            "verifyFailed": "क्रेडेंशियल की प्रामाणिकता सत्यापित नहीं की जा सकी। यह समाप्त हो सकता है, रद्द किया गया हो सकता है, बदला गया हो सकता है, या अविश्वसनीय स्रोत द्वारा जारी किया गया हो सकता है।",
+            "verifyDisclosedAttributes": "क्रेडेंशियल में कुछ जानकारी सत्यापित नहीं की जा सकी। कृपया सुनिश्चित करें कि क्रेडेंशियल पूर्ण है और इसे संशोधित नहीं किया गया है।",
+            "unknownError": "क्रेडेंशियल सत्यापन के दौरान एक अप्रत्याशित समस्या हुई। कृपया बाद में पुनः प्रयास करें।",
+            "unknownErrorOccurred": "सत्यापन के दौरान एक अज्ञात त्रुटि हुई।",
+            "unknownErrorRaw": "एक अज्ञात त्रुटि हुई"
+        }
+    }
+}

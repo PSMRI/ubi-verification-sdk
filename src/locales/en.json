@@ -1,0 +1,35 @@
+{
+    "errors": {
+        "missingCredential": "Missing or empty required parameter: credential",
+        "missingConfig": "Missing required parameter: config",
+        "verificationFailed": "Verification failed",
+        "validationError": "Validation error: {{details}}",
+        "invalidResultNotObject": "Invalid verification result: not an object",
+        "invalidResultMissingSuccess": "Invalid verification result: missing \"success\" boolean",
+        "invalidResultMissingMessage": "Invalid verification result: missing \"message\"",
+        "invalidResultMissingErrors": "Invalid verification result: failed result must include \"errors\" array",
+        "genericError": "An error occurred: {{message}}"
+    },
+    "verification": {
+        "success": "Credential verified successfully.",
+        "failed": "Credential verification failed.",
+        "signatureSuccess": "Credential verified using signature.",
+        "signatureFailed": "Credential verification using signature failed.",
+        "apiError": "Verification API error"
+    },
+    "credential": {
+        "invalidStructure": "Invalid credential structure: missing credentialSubject",
+        "invalidExpiryFormat": "Invalid validupto date format",
+        "expired": "The credential has expired and is no longer valid.",
+        "expiryCheckError": "Error checking credential expiry: {{error}}"
+    },
+    "dhiway": {
+        "errors": {
+            "verifyFailed": "The credential's authenticity couldn't be verified. It may be expired, revoked, altered, or issued by an untrusted source.",
+            "verifyDisclosedAttributes": "Some information in the credential couldn't be verified. Please ensure the credential is complete and hasn't been modified.",
+            "unknownError": "An unexpected issue occurred during credential verification. Please try again later.",
+            "unknownErrorOccurred": "An unknown error occurred during verification.",
+            "unknownErrorRaw": "An unknown error occurred"
+        }
+    }
+}

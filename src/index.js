@@ -4,6 +4,7 @@ const swagger = require('@fastify/swagger');
 const swaggerUI = require('@fastify/swagger-ui');
 const path = require('path');
 const verificationService = require('./services/verificationService');
+const { getTranslator, getLocaleFromRequest } = require('./utils/i18n');
 require('dotenv').config();
 const PORT = process.env.PORT || 3010;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -35,6 +36,13 @@ fastify.register(swaggerUI, {
   },
   staticCSP: true,
   transformStaticCSP: (header) => header
+});
+
+// Add hook to attach translator to request based on locale
+fastify.addHook('onRequest', async (request, reply) => {
+  const locale = getLocaleFromRequest(request);
+  request.t = getTranslator(locale);
+  request.locale = locale;
 });
 
 // Health check route
@@ -129,34 +137,35 @@ fastify.post('/verification', {
 }, async (request, reply) => {
   try {
     const payload = request.body;
+    const t = request.t;
 
     if (!payload.credential || typeof payload.credential !== 'object' || Object.keys(payload.credential).length === 0) {
-      reply.code(400).send({ error: 'Missing or empty required parameter: credential' });
+      reply.code(400).send({ error: t('errors.missingCredential') });
       return;
     }
 
     if (!payload.config) {
-      reply.code(400).send({ error: 'Missing required parameter: config' });
+      reply.code(400).send({ error: t('errors.missingConfig') });
       return;
     }
 
     let results;
     try {
-      results = await verificationService.verify(payload);
+      results = await verificationService.verify(payload, t);
     } catch (error) {
-      reply.code(400).send({ error: error.message });
+      reply.code(400).send({ error: t('errors.genericError', { message: error.message }) });
       return;
     }
 
     // If verification failed and errors array is missing, return the error directly
     if (results && results.success === false && !Array.isArray(results.errors)) {
-      reply.code(400).send({ error: results.message || 'Verification failed' });
+      reply.code(400).send({ error: results.message || t('errors.verificationFailed') });
       return;
     }
 
     let verificationOutcome;
     try {
-      verificationOutcome = validateVerificationResult(results);
+      verificationOutcome = validateVerificationResult(results, t);
     } catch (error) {
       reply.code(400).send({ error: error.message });
       return;
@@ -164,15 +173,17 @@ fastify.post('/verification', {
     return verificationOutcome;
   } catch (error) {
     fastify.log.error(error);
-    reply.code(400).send({ error: error.message });
+    const t = request.t || getTranslator('en');
+    reply.code(400).send({ error: t('errors.genericError', { message: error.message }) });
   }
 });
 
 fastify.setErrorHandler((error, request, reply) => {
+  const t = request.t || getTranslator('en');
   if (error.validation) {
     // Fastify validation error
     const missing = error.validation.map(v => v.message).join(', ');
-    reply.status(400).send({ error: `Validation error: ${missing}` });
+    reply.status(400).send({ error: t('errors.validationError', { details: missing }) });
   } else {
     reply.status(error.statusCode || 500).send({ error: error.message });
   }
@@ -192,21 +203,22 @@ const start = async () => {
 
 start();
 
-function validateVerificationResult(result) {
+function validateVerificationResult(result, t) {
+  const translator = t || getTranslator('en');
   if (typeof result !== 'object' || result === null) {
-    throw new Error('Invalid verification result: not an object');
+    throw new Error(translator('errors.invalidResultNotObject'));
   }
 
   if (typeof result.success !== 'boolean') {
-    throw new Error('Invalid verification result: missing "success" boolean');
+    throw new Error(translator('errors.invalidResultMissingSuccess'));
   }
 
   if (typeof result.message !== 'string') {
-    throw new Error('Invalid verification result: missing "message"');
+    throw new Error(translator('errors.invalidResultMissingMessage'));
   }
 
   if (!result.success && !Array.isArray(result.errors)) {
-    throw new Error('Invalid verification result: failed result must include "errors" array');
+    throw new Error(translator('errors.invalidResultMissingErrors'));
   }
 
   return result;

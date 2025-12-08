@@ -1,5 +1,9 @@
 const axios = require("axios");
 const VerifierInterface = require("../VerifierInterface");
+
+// Private title - if not set, will use filename
+const _title = "dhiway"; // Set to custom title if needed, e.g., "Dhiway Verification Service"
+
 class DhiwayVerifier extends VerifierInterface {
   constructor(config = {}, t) {
     super(config, t);
@@ -7,10 +11,14 @@ class DhiwayVerifier extends VerifierInterface {
     this.apiToken = process.env.DHIWAY_VERIFIER_VERIFICATION_API_TOKEN;
     this.expiryField = process.env.DHIWAY_VERIFIER_EXPIRY_FIELD || "validUntil";
     if (!this.apiEndpoint) {
-      throw new Error("DHIWAY_VERIFIER_VERIFICATION_API environment variable is not set.");
+      throw new Error(
+        "DHIWAY_VERIFIER_VERIFICATION_API environment variable is not set."
+      );
     }
     if (!this.apiToken) {
-      throw new Error("DHIWAY_VERIFIER_VERIFICATION_API_TOKEN environment variable is not set.");
+      throw new Error(
+        "DHIWAY_VERIFIER_VERIFICATION_API_TOKEN environment variable is not set."
+      );
     }
   }
 
@@ -37,7 +45,7 @@ class DhiwayVerifier extends VerifierInterface {
       // If expiry field is not present, skip expiry check and proceed with verification
       if (!validUpto) {
         return {
-          isValid: true
+          isValid: true,
         };
       }
 
@@ -63,7 +71,7 @@ class DhiwayVerifier extends VerifierInterface {
       }
 
       return {
-        isValid: true
+        isValid: true,
       };
     } catch (error) {
       return {
@@ -117,22 +125,18 @@ class DhiwayVerifier extends VerifierInterface {
           errors: [
             {
               error: expiryCheck.error,
-              raw: "VC expiration check failed"
-            }
-          ]
+              raw: "VC expiration check failed",
+            },
+          ],
         };
       }
 
-      const response = await axios.post(
-        this.apiEndpoint,
-        credential,
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(this.apiEndpoint, credential, {
+        headers: {
+          Authorization: `Bearer ${this.apiToken}`,
+          "Content-Type": "application/json",
+        },
+      });
       return this.translateResponse(response);
     } catch (error) {
       return {

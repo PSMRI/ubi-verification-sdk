@@ -1,8 +1,8 @@
 const axios = require("axios");
 const VerifierInterface = require("../VerifierInterface");
 class DhiwayVerifier extends VerifierInterface {
-  constructor() {
-    super();
+  constructor(config = {}, t) {
+    super(config, t);
     this.apiEndpoint = process.env.DHIWAY_VERIFIER_VERIFICATION_API;
     this.apiToken = process.env.DHIWAY_VERIFIER_VERIFICATION_API_TOKEN;
     this.expiryField = process.env.DHIWAY_VERIFIER_EXPIRY_FIELD || "validUntil";
@@ -14,14 +14,13 @@ class DhiwayVerifier extends VerifierInterface {
     }
   }
 
-  errorTranslator = {
-    "Failed to verify CordProof2024":
-      "The credential's authenticity couldn't be verified. It may be expired, revoked, altered, or issued by an untrusted source.",
-    "Error verifyDisclosedAttributes":
-      "Some information in the credential couldn't be verified. Please ensure the credential is complete and hasn't been modified.",
-    "Unknown error in check":
-      "An unexpected issue occurred during credential verification. Please try again later.",
-  };
+  getErrorTranslator() {
+    return {
+      "Failed to verify CordProof2024": this.t('dhiway.errors.verifyFailed'),
+      "Error verifyDisclosedAttributes": this.t('dhiway.errors.verifyDisclosedAttributes'),
+      "Unknown error in check": this.t('dhiway.errors.unknownError'),
+    };
+  }
 
   checkExpiry(credential) {
     try {
@@ -29,7 +28,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (!credential) {
         return {
           isValid: false,
-          error: "Invalid credential structure: missing credentialSubject"
+          error: this.t('credential.invalidStructure')
         };
       }
 
@@ -49,7 +48,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (isNaN(expiryDate.getTime())) {
         return {
           isValid: false,
-          error: "Invalid validupto date format"
+          error: this.t('credential.invalidExpiryFormat')
         };
       }
 
@@ -59,7 +58,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (currentDate > expiryDate) {
         return {
           isValid: false,
-          error: "The credential has expired and is no longer valid."
+          error: this.t('credential.expired')
         };
       }
 
@@ -69,20 +68,21 @@ class DhiwayVerifier extends VerifierInterface {
     } catch (error) {
       return {
         isValid: false,
-        error: "Error checking credential expiry: " + error.message
+        error: this.t('credential.expiryCheckError', { error: error.message })
       };
     }
   }
 
   translateResponse(response) {
     const error = response?.data?.error;
+    const errorTranslator = this.getErrorTranslator();
     let formattedErrors = [];
     if (error && (Array.isArray(error) ? error.length > 0 : true)) {
       const pushError = (errObj) => ({
         error:
-          this.errorTranslator[errObj.message] ||
-          "An unknown error occurred during verification.",
-        raw: errObj.message || "An unknown error occurred",
+          errorTranslator[errObj.message] ||
+          this.t('dhiway.errors.unknownErrorOccurred'),
+        raw: errObj.message || this.t('dhiway.errors.unknownErrorRaw'),
       });
       if (Array.isArray(error)) {
         formattedErrors = error.map(pushError);
@@ -94,14 +94,14 @@ class DhiwayVerifier extends VerifierInterface {
     if (formattedErrors.length > 0) {
       return {
         success: false,
-        message: "Credential verification failed.",
+        message: this.t('verification.failed'),
         errors: formattedErrors,
       };
     }
 
     return {
       success: true,
-      message: "Credential verified successfully.",
+      message: this.t('verification.success'),
     };
   }
 
@@ -113,7 +113,7 @@ class DhiwayVerifier extends VerifierInterface {
       if (!expiryCheck.isValid) {
         return {
           success: false,
-          message: "Credential verification failed.",
+          message: this.t('verification.failed'),
           errors: [
             {
               error: expiryCheck.error,
@@ -137,7 +137,7 @@ class DhiwayVerifier extends VerifierInterface {
     } catch (error) {
       return {
         success: false,
-        message: "Verification API error",
+        message: this.t('verification.apiError'),
         errors: [
           {
             error: error.message,

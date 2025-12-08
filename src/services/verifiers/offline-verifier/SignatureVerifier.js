@@ -8,12 +8,12 @@ class SignatureVerifier extends VerifierInterface {
     if (isValid) {
       return {
         success: true,
-        message: 'Credential verified using signature.'
+        message: this.t('verification.signatureSuccess')
       };
     } else {
       return {
         success: false,
-        message: 'Credential verification using signature failed.'
+        message: this.t('verification.signatureFailed')
       };
     }
   }

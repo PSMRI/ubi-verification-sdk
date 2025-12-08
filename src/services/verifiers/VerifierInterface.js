@@ -1,9 +1,11 @@
 class VerifierInterface {
   /**
    * @param {Object} config
+   * @param {Function} t - Translation function
    */
-  constructor(config = {}) {
+  constructor(config = {}, t) {
     this.config = config;
+    this.t = t || (() => (key, replacements) => replacements?.message || key);
   }
 
   /**

@@ -22,12 +22,8 @@ const _title = "jharseva"; // Set to custom title if needed, e.g., "JharSeva Ver
  * @extends VerifierInterface
  */
 class JharSevaVerifier extends VerifierInterface {
-  constructor(config = {}) {
-    super(config, __filename);
-    // Set title if _title is defined
-    if (_title) {
-      this.setTitle(_title);
-    }
+  constructor(config = {}, t) {
+    super(config, t);
     // Load configuration from environment variables
     this.apiEndpoint = process.env.JHARSEVA_VERIFICATION_API;
     this.apiToken = process.env.JHARSEVA_VERIFICATION_API_TOKEN;
@@ -37,17 +33,17 @@ class JharSevaVerifier extends VerifierInterface {
   /**
    * Error translator for JharSeva-specific error messages
    * Converts technical error messages to user-friendly descriptions
+   * @returns {Object} Error message mapping
    */
-  errorTranslator = {
-    "Invalid credential": "The credential format is invalid or incomplete.",
-    "Verification failed":
-      "The credential could not be verified. Please ensure it is valid and not expired.",
-    "Service unavailable":
-      "The JharSeva verification service is temporarily unavailable. Please try again later.",
-    "Invalid signature":
-      "The credential's signature is invalid or has been tampered with.",
-    "Expired credential": "The credential has expired and is no longer valid.",
-  };
+  getErrorTranslator() {
+    return {
+      "Invalid credential": this.t('jharseva.errors.invalidCredential'),
+      "Verification failed": this.t('jharseva.errors.verificationFailed'),
+      "Service unavailable": this.t('jharseva.errors.serviceUnavailable'),
+      "Invalid signature": this.t('jharseva.errors.invalidSignature'),
+      "Expired credential": this.t('jharseva.errors.expiredCredential'),
+    };
+  }
 
   /**
    * Check if credential has expired
@@ -62,7 +58,7 @@ class JharSevaVerifier extends VerifierInterface {
       if (!credential) {
         return {
           isValid: false,
-          error: "Invalid credential structure: missing credential data",
+          error: this.t('credential.invalidStructure')
         };
       }
 
@@ -82,7 +78,7 @@ class JharSevaVerifier extends VerifierInterface {
       if (isNaN(expiryDate.getTime())) {
         return {
           isValid: false,
-          error: "Invalid expiry date format",
+          error: this.t('credential.invalidExpiryFormat')
         };
       }
 
@@ -92,7 +88,7 @@ class JharSevaVerifier extends VerifierInterface {
       if (currentDate > expiryDate) {
         return {
           isValid: false,
-          error: "The credential has expired and is no longer valid.",
+          error: this.t('credential.expired')
         };
       }
 
@@ -102,7 +98,7 @@ class JharSevaVerifier extends VerifierInterface {
     } catch (error) {
       return {
         isValid: false,
-        error: "Error checking credential expiry: " + error.message,
+        error: this.t('credential.expiryCheckError', { error: error.message })
       };
     }
   }
@@ -116,14 +112,15 @@ class JharSevaVerifier extends VerifierInterface {
    */
   translateResponse(response) {
     const error = response?.data?.error;
+    const errorTranslator = this.getErrorTranslator();
     let formattedErrors = [];
 
     if (error && (Array.isArray(error) ? error.length > 0 : true)) {
       const pushError = (errObj) => ({
         error:
-          this.errorTranslator[errObj.message] ||
-          "An unknown error occurred during verification.",
-        raw: errObj.message || "An unknown error occurred",
+          errorTranslator[errObj.message] ||
+          this.t('jharseva.errors.unknownErrorOccurred'),
+        raw: errObj.message || this.t('jharseva.errors.unknownErrorRaw'),
       });
 
       if (Array.isArray(error)) {
@@ -137,7 +134,7 @@ class JharSevaVerifier extends VerifierInterface {
     if (formattedErrors.length > 0) {
       return {
         success: false,
-        message: "Credential verification failed.",
+        message: this.t('verification.failed'),
         errors: formattedErrors,
       };
     }
@@ -145,7 +142,7 @@ class JharSevaVerifier extends VerifierInterface {
     // Return success response
     return {
       success: true,
-      message: "Credential verified successfully.",
+      message: this.t('verification.success'),
     };
   }
 
@@ -168,7 +165,7 @@ class JharSevaVerifier extends VerifierInterface {
       if (!expiryCheck.isValid) {
         return {
           success: false,
-          message: "Credential verification failed.",
+          message: this.t('verification.failed'),
           errors: [
             {
               error: expiryCheck.error,
@@ -182,7 +179,7 @@ class JharSevaVerifier extends VerifierInterface {
       if (!this.apiEndpoint || !this.apiToken) {
         return {
           success: true,
-          message: "Credential verified successfully.",
+          message: this.t('verification.success'),
         };
       }
 
@@ -200,7 +197,7 @@ class JharSevaVerifier extends VerifierInterface {
       // Handle API errors (network issues, timeouts, etc.)
       return {
         success: false,
-        message: "Verification API error",
+        message: this.t('verification.apiError'),
         errors: [
           {
             error: error.message,

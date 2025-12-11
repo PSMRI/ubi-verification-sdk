@@ -31,5 +31,16 @@
             "unknownErrorOccurred": "An unknown error occurred during verification.",
             "unknownErrorRaw": "An unknown error occurred"
         }
+    },
+    "jharseva": {
+        "errors": {
+            "invalidCredential": "The credential format is invalid or incomplete.",
+            "verificationFailed": "The credential could not be verified. Please ensure it is valid and not expired.",
+            "serviceUnavailable": "The JharSeva verification service is temporarily unavailable. Please try again later.",
+            "invalidSignature": "The credential's signature is invalid or has been tampered with.",
+            "expiredCredential": "The credential has expired and is no longer valid.",
+            "unknownErrorOccurred": "An unknown error occurred during verification.",
+            "unknownErrorRaw": "An unknown error occurred"
+        }
     }
 }

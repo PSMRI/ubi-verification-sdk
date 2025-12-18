@@ -135,7 +135,7 @@ To add new verifiers, implement a new class and integrate it with the verificati
     - `"online"`: Verifies using a named online verifier (requires `issuerName`).
     - `"offline"`: (To be implemented by adding an offline verifier class)
   - **`issuerName`** (`string`, required if `method` is `"online"`):  
-    Name of the verifier to use (currently supports `"dhiway"`).
+    Name of the verifier to use (currently supports `"dhiway"`)
 
 #### Example Request
 

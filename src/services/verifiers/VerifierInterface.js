@@ -1,9 +1,14 @@
+const path = require("path");
+
 class VerifierInterface {
   /**
    * @param {Object} config
+   * @param {string} filename - Optional filename to derive title from
+   * @param {Function} t - Translation function
    */
-  constructor(config = {}) {
+  constructor(config = {}, t) {
     this.config = config;
+    this.t = t || (() => (key, replacements) => replacements?.message || key);
   }
 
   /**
@@ -17,7 +22,7 @@ class VerifierInterface {
    * @returns {Promise<Object>}
    */
   async verify(credential) {
-    throw new Error('verify() must be implemented by subclass');
+    throw new Error("verify() must be implemented by subclass");
   }
 }
 

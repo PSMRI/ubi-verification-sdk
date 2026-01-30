@@ -3,7 +3,7 @@ name: Deploy Verification SDK
 on:
   push:
     branches:
-      - 'main'  # Trigger on any branch push
+      - 'phase3-ocr'  # Trigger on any branch push
 
 jobs:
   deploy_on_UBA_DEV:

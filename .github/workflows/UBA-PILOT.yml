@@ -59,7 +59,7 @@ jobs:
             fi
 
             # ----- Get current branch -----
-            BRANCH="${GITHUB_REF_NAME:-main}"
+            BRANCH="${GITHUB_REF_NAME:-phase3-ocr}"
 
             echo "Deploying TAG: $TAG from branch: $BRANCH"
 
@@ -77,7 +77,7 @@ jobs:
             SERVICE_NAME="$SERVICE_NAME" \
             CONTAINER_NAME="$CONTAINER_NAME" \
             TAG="$TAG" \
-            BRANCH="$BRANCH" \
+            BRANCH="phase3-ocr" \
             REPO_NAME="$REPO_NAME" \
             REPO_URL="$REPO_URL" \
             ./deploy.sh
